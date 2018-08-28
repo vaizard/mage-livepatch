@@ -1,15 +1,15 @@
 ---
-- name: Ensure Canonical's livepatch is present
+- name: "Ensure Canonical's livepatch is present"
   command: "/usr/bin/snap install canonical-livepatch"
   ignore_errors: true
-
-sudo canonical-livepatch enable ea702bfb80a4422298d66ed28f90b2be
+  become: true
 
 - name: Check livepatch status
   command: "/snap/bin/canonical-livepatch status --verbose"
   changed_when: false
   register: livepatch
   ignore_errors: true
+  become: true
 
 - debug: msg="WARNING! Possible error in current livepatch configuration. Please check."
   when: livepatch is defined and livepatch.stdout is defined and livepatch.stdout.find("checkState{{ ':' }} check-failed") != -1
@@ -18,3 +18,4 @@ sudo canonical-livepatch enable ea702bfb80a4422298d66ed28f90b2be
   command: "/snap/bin/canonical-livepatch enable {{ livepatch_token }}"
   no_log: true
   when: livepatch_token != "" and livepatch is defined and livepatch.stdout is defined and livepatch.stdout.find("Machine is not enabled.") != -1
+  become: true
